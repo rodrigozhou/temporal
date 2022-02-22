@@ -554,6 +554,18 @@ func newAdminClusterCommands() []cli.Command {
 					Name:  FlagConnectionEnable,
 					Usage: "connection enabled",
 				},
+				cli.Int64Flag{
+					Name:  FlagInitialFailoverVersion,
+					Usage: "initial failover version",
+				},
+				cli.Int64Flag{
+					Name:  FlagFailoverIncrement,
+					Usage: "failover increment",
+				},
+				cli.BoolFlag{
+					Name:  FlagGlobalNamespaceEnabled,
+					Usage: "global namespace enabled",
+				},
 			),
 			Action: func(c *cli.Context) {
 				AdminUpdateClusterName(c)

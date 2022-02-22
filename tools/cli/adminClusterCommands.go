@@ -100,15 +100,38 @@ func AdminUpdateClusterName(c *cli.Context) {
 		ErrorAndExit("Failed to get current cluster metadata", err)
 	}
 
-	var version int64
 	var initialFailoverVersion int64
+	if c.IsSet(FlagInitialFailoverVersion) {
+		initialFailoverVersion = c.Int64(FlagInitialFailoverVersion)
+	} else {
+		if newCluster != currentCluster {
+			// new record
+			initialFailoverVersion = currentClusterMetadata.InitialFailoverVersion + 1
+		} else {
+			initialFailoverVersion = currentClusterMetadata.InitialFailoverVersion
+		}
+	}
+
+	var failoverIncrement int64
+	if c.IsSet(FlagFailoverIncrement) {
+		failoverIncrement = c.Int64(FlagFailoverIncrement)
+	} else {
+		failoverIncrement = currentClusterMetadata.FailoverVersionIncrement
+	}
+
+	var version int64
 	if newCluster != currentCluster {
 		// new record
 		version = 0
-		initialFailoverVersion = currentClusterMetadata.InitialFailoverVersion + 1
 	} else {
 		version = currentClusterMetadata.Version
-		initialFailoverVersion = currentClusterMetadata.InitialFailoverVersion
+	}
+
+	var globalNamespaceEnabled bool
+	if c.IsSet(FlagGlobalNamespaceEnabled) {
+		globalNamespaceEnabled = c.Bool(FlagGlobalNamespaceEnabled)
+	} else {
+		globalNamespaceEnabled = currentClusterMetadata.IsGlobalNamespaceEnabled
 	}
 
 	applied, err := clusterMetadataManager.SaveClusterMetadata(&persistence.SaveClusterMetadataRequest{
@@ -119,15 +142,15 @@ func AdminUpdateClusterName(c *cli.Context) {
 			VersionInfo:              currentClusterMetadata.VersionInfo,
 			IndexSearchAttributes:    currentClusterMetadata.IndexSearchAttributes,
 			ClusterAddress:           currentClusterMetadata.ClusterAddress,
-			FailoverVersionIncrement: currentClusterMetadata.FailoverVersionIncrement,
+			FailoverVersionIncrement: failoverIncrement,
 			InitialFailoverVersion:   initialFailoverVersion,
-			IsGlobalNamespaceEnabled: currentClusterMetadata.IsGlobalNamespaceEnabled,
+			IsGlobalNamespaceEnabled: globalNamespaceEnabled,
 			IsConnectionEnabled:      connectionEnabled,
 		},
 		Version: version,
 	})
 	if !applied || err != nil {
-		ErrorAndExit("Failed to create new cluster metadata", err)
+		ErrorAndExit(fmt.Sprintf("Failed to create new cluster metadata: %v", err), err)
 	}
 	// Use raw store client to delete
 	//err = clusterStore.DeleteClusterMetadata(&persistence.InternalDeleteClusterMetadataRequest{ClusterName: currentCluster})

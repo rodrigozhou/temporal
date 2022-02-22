@@ -95,6 +95,7 @@ const (
 	FlagNewCluster                            = "new_cluster"
 	FlagFailoverIncrement                     = "failover_increment"
 	FlagInitialFailoverVersion                = "initial_failover_version"
+	FlagGlobalNamespaceEnabled                = "global_namespace_enabled"
 	FlagResult                                = "result"
 	FlagIdentity                              = "identity"
 	FlagDetail                                = "detail"
