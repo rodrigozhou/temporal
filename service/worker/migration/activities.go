@@ -134,6 +134,7 @@ func (a *activities) checkReplicationOnce(ctx context.Context, waitRequest waitR
 				tag.NewDurationTag("AllowedLagging", waitRequest.AllowedLagging),
 				tag.NewDurationTag("ActualLagging", shard.ShardLocalTime.Sub(*clusterInfo.AckedTaskVisibilityTime)),
 				tag.NewStringTag("RemoteCluster", waitRequest.RemoteCluster),
+				tag.NewInt64("MaxReplicationTaskId", shard.MaxReplicationTaskId),
 			)
 		}
 	}
