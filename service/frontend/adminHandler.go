@@ -562,32 +562,32 @@ func (adh *AdminHandler) ListHistoryTasks(
 	taskCategory, ok := tasks.GetCategoryByID(int32(request.Category))
 	if !ok {
 		return nil, adh.error(&serviceerror.InvalidArgument{
-			Message: fmt.Sprintf("unknown task category: %v", request.Category),
+			Message: fmt.Sprintf("Unknown task category: %v", request.Category),
 		}, scope)
 	}
 
 	var minTaskKey, maxTaskKey tasks.Key
 	if taskRange.InclusiveMinTaskKey != nil {
-		minTaskKey = tasks.NewKey(
-			timestamp.TimeValue(taskRange.InclusiveMinTaskKey.FireTime),
-			taskRange.InclusiveMinTaskKey.TaskId,
-		)
-		if err := tasks.ValidateKey(minTaskKey); err != nil {
+		fireTime := timestamp.TimeValue(taskRange.InclusiveMinTaskKey.FireTime)
+		taskID := taskRange.InclusiveMinTaskKey.TaskId
+		if err := tasks.ValidateFireTimeAndID(fireTime, taskID); err != nil {
 			return nil, adh.error(&serviceerror.InvalidArgument{
-				Message: fmt.Sprintf("invalid minTaskKey: %v", err.Error()),
+				Message: fmt.Sprintf("Invalid minTaskKey: %v", err.Error()),
 			}, scope)
 		}
+
+		minTaskKey = tasks.NewKey(fireTime, taskID)
 	}
 	if taskRange.ExclusiveMaxTaskKey != nil {
-		maxTaskKey = tasks.NewKey(
-			timestamp.TimeValue(taskRange.ExclusiveMaxTaskKey.FireTime),
-			taskRange.ExclusiveMaxTaskKey.TaskId,
-		)
-		if err := tasks.ValidateKey(maxTaskKey); err != nil {
+		fireTime := timestamp.TimeValue(taskRange.ExclusiveMaxTaskKey.FireTime)
+		taskID := taskRange.ExclusiveMaxTaskKey.TaskId
+		if err := tasks.ValidateFireTimeAndID(fireTime, taskID); err != nil {
 			return nil, adh.error(&serviceerror.InvalidArgument{
-				Message: fmt.Sprintf("invalid maxTaskKey: %v", err.Error()),
+				Message: fmt.Sprintf("Invalid maxTaskKey: %v", err.Error()),
 			}, scope)
 		}
+
+		maxTaskKey = tasks.NewKey(fireTime, taskID)
 	}
 	resp, err := adh.persistenceExecutionManager.GetHistoryTasks(ctx, &persistence.GetHistoryTasksRequest{
 		ShardID:             request.ShardId,

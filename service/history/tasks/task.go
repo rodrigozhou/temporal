@@ -65,6 +65,10 @@ type (
 )
 
 func NewImmediateKey(taskID int64) Key {
+	if err := ValidateID(taskID); err != nil {
+		panic(err.Error())
+	}
+
 	return Key{
 		FireTime: DefaultFireTime,
 		TaskID:   taskID,
@@ -72,19 +76,27 @@ func NewImmediateKey(taskID int64) Key {
 }
 
 func NewKey(fireTime time.Time, taskID int64) Key {
+	if err := ValidateFireTimeAndID(fireTime, taskID); err != nil {
+		panic(err.Error())
+	}
+
 	return Key{
 		FireTime: fireTime,
 		TaskID:   taskID,
 	}
 }
 
-func ValidateKey(key Key) error {
-	if key.FireTime.UnixNano() < defaultFireTimeUnixNano {
-		return fmt.Errorf("task key fire time must have unix nano value >= 0, got %v", key.FireTime.UnixNano())
+func ValidateFireTimeAndID(fireTime time.Time, taskID int64) error {
+	if fireTime.UnixNano() < defaultFireTimeUnixNano {
+		return fmt.Errorf("task key fire time must have unix nano value >= 0, got %v", fireTime.UnixNano())
 	}
 
-	if key.TaskID < 0 {
-		return fmt.Errorf("task key ID must >= 0, got %v", key.TaskID)
+	return ValidateID(taskID)
+}
+
+func ValidateID(taskID int64) error {
+	if taskID < 0 {
+		return fmt.Errorf("task key ID must >= 0, got %v", taskID)
 	}
 
 	return nil
