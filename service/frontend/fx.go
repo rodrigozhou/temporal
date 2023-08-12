@@ -627,15 +627,20 @@ func HTTPAPIServerProvider(
 	namespaceRegistry namespace.Registry,
 	logger log.Logger,
 ) (*HTTPAPIServer, error) {
+	fmt.Println("[http api] Loading HTTP API Server...")
 	// If the service is not the frontend service, HTTP API is disabled
 	if serviceName != primitives.FrontendService {
+		fmt.Println("[http api] Service is not frontend: done")
 		return nil, nil
 	}
+	fmt.Println("[http api] Checking if httpPort is set...")
 	// If HTTP API port is 0, it is disabled
 	rpcConfig := cfg.Services[string(serviceName)].RPC
 	if rpcConfig.HTTPPort == 0 {
+		fmt.Println("[http api] httpPort is not set: done")
 		return nil, nil
 	}
+	fmt.Printf("[http api] Creating http api server listening in port %d...", rpcConfig.HTTPPort)
 	return NewHTTPAPIServer(
 		serviceConfig,
 		rpcConfig,

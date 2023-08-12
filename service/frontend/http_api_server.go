@@ -189,6 +189,7 @@ func NewHTTPAPIServer(
 // GracefulStop completes. Upon graceful stop, this will return nil. If an error
 // is returned, the message is clear that it came from the HTTP API server.
 func (h *HTTPAPIServer) Serve() error {
+	fmt.Printf("[HTTPApiServer] Serve called...\n")
 	err := h.server.Serve(h.listener)
 	// If the error is for close, we have to wait for the shutdown to complete and
 	// we don't consider it an error
@@ -218,6 +219,7 @@ func (h *HTTPAPIServer) GracefulStop(gracefulDrainTime time.Duration) {
 }
 
 func (h *HTTPAPIServer) serveHTTP(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("[HTTPAPIServer] serveHTTP called: %v\n", r.URL)
 	// Limit the request body to max gRPC size. This is hardcoded to 4MB at the
 	// moment using gRPC's default at
 	// https://github.com/grpc/grpc-go/blob/0673105ebcb956e8bf50b96e28209ab7845a65ad/server.go#L58
