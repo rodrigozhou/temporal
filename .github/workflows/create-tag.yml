@@ -1,0 +1,70 @@
+name: "Create a tag"
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to be tagged"
+        required: true
+      tag:
+        description: "Tag for new version (1.23.4)"
+        required: true
+
+jobs:
+  create-tag:
+    name: "Create a tag"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Generate a token
+        id: generate_token
+        uses: tibdex/github-app-token@b62528385c34dbc9f38e5f4225ac829252d1ea92
+        with:
+          app_id: ${{ secrets.TEMPORAL_CICD_APP_ID }}
+          private_key: ${{ secrets.TEMPORAL_CICD_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          token: ${{ steps.generate_token.outputs.token }}
+          ref: ${{ github.event.inputs.branch }}
+          fetch-depth: 0
+
+      - name: Set up Github credentials
+        env:
+          CURRENT_REPO: ${{ github.repository }}
+          TOKEN: ${{ steps.generate_token.outputs.token }}
+        run: |
+          git config --local user.name 'Temporal Data'
+          git config --local user.email 'commander-data@temporal.io'
+          git remote set-url origin "https://x-access-token:$TOKEN@github.com/$CURRENT_REPO"
+
+      - name: Check current version
+        run: |
+          grep '^\s*ServerVersion = "[0-9]\+\.[0-9]\+\.[0-9]\+"$' common/headers/version_checker.go || exit 1
+
+      - name: Update Server version
+        run: |
+          sed -i -e "s/ServerVersion = \"[0-9]*\.[0-9]*\.[0-9]*\"/ServerVersion = \"$TAG\"/g" common/headers/version_checker.go
+
+      - name: Commit change
+        env:
+          TAG: ${{ github.event.inputs.tag }}
+          BRANCH: ${{ github.event.inputs.branch }}
+        run: |
+          git add .
+          git commit -m "Bump Server version to $TAG"
+          git push origin "$BRANCH"
+
+      - name: Create tag
+        env:
+          TAG: ${{ github.event.inputs.tag }}
+          BRANCH: ${{ github.event.inputs.branch }}
+        run: |
+          git tag "v$TAG"
+          git push origin "v$TAG"
