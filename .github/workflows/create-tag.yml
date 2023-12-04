@@ -9,6 +9,13 @@ on:
       tag:
         description: "Tag for new version (1.23.4)"
         required: true
+      release_notes:
+        type: boolean
+        description: "Create draft release notes"
+        default: false
+      base_ref:
+        description: "Base ref to generate commit list for release notes"
+        required: false
 
 jobs:
   create-tag:
@@ -69,3 +76,11 @@ jobs:
         run: |
           git tag "v$TAG"
           git push origin "v$TAG"
+
+      - name: Create draft release notes
+        if: ${{ github.event.inputs.release_notes && github.event.inputs.base_ref != "" }}
+        env:
+          BASE_REF: ${{ github.event.inputs.base_ref }}
+          TAG: ${{ github.event.inputs.tag}}
+        run: |
+          gh release create "v$TAG" --verify-tag --draft --title "v$TAG" --notes "$(git log --cherry-pick --right-only --pretty="%cd - %h - %s" --date=short ${BASE_REF}..${TAG})"
