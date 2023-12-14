@@ -98,21 +98,24 @@ func (s *FunctionalSuite) Test_DeleteWorkflowExecution_Competed() {
 	// Verify that workflow is completed and visibility is updated.
 	for _, we := range wes {
 		executionsCount := 0
-		for i := 0; i < 10; i++ {
-			visibilityResponse, err := s.engine.ListWorkflowExecutions(NewContext(), &workflowservice.ListWorkflowExecutionsRequest{
-				Namespace:     s.namespace,
-				PageSize:      1,
-				NextPageToken: nil,
-				Query:         fmt.Sprintf("WorkflowId='%s'", we.WorkflowId),
-			})
-			s.NoError(err)
-			if len(visibilityResponse.Executions) != 1 || visibilityResponse.Executions[0].Status != enumspb.WORKFLOW_EXECUTION_STATUS_COMPLETED {
-				time.Sleep(100 * time.Millisecond)
-			} else {
+		s.Eventually(
+			func() bool {
+				visibilityResponse, err := s.engine.ListWorkflowExecutions(NewContext(), &workflowservice.ListWorkflowExecutionsRequest{
+					Namespace:     s.namespace,
+					PageSize:      1,
+					NextPageToken: nil,
+					Query:         fmt.Sprintf("WorkflowId='%s'", we.WorkflowId),
+				})
+				s.NoError(err)
+				if len(visibilityResponse.Executions) != 1 || visibilityResponse.Executions[0].Status != enumspb.WORKFLOW_EXECUTION_STATUS_COMPLETED {
+					return false
+				}
 				executionsCount = len(visibilityResponse.Executions)
-				break
-			}
-		}
+				return true
+			},
+			waitForESToSettle,
+			100*time.Millisecond,
+		)
 		s.Equal(1, executionsCount)
 	}
 

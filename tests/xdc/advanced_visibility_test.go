@@ -105,7 +105,6 @@ func (s *AdvVisCrossDCTestSuite) SetupSuite() {
 
 	var fileName string
 	if tests.UsingSQLAdvancedVisibility() {
-		// NOTE: can't use xdc_clusters.yaml here because it somehow interferes with the other xDC tests.
 		fileName = "../testdata/xdc_adv_vis_clusters.yaml"
 		s.isElasticsearchEnabled = false
 		s.logger.Info(fmt.Sprintf("Running xDC advanced visibility test with %s/%s persistence", tests.TestFlags.PersistenceType, tests.TestFlags.PersistenceDriver))

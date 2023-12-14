@@ -1563,6 +1563,9 @@ func (s *FunctionalSuite) TestSignalWithStartWorkflow() {
 	s.ProtoEqual(signalInput, signalEvent.GetWorkflowExecutionSignaledEventAttributes().Input)
 	s.Equal(identity, signalEvent.GetWorkflowExecutionSignaledEventAttributes().Identity)
 
+	// wait for visibility to settle
+	time.Sleep(waitForESToSettle)
+
 	// Assert visibility is correct
 	listOpenRequest := &workflowservice.ListOpenWorkflowExecutionsRequest{
 		Namespace:       s.namespace,
@@ -1590,6 +1593,9 @@ func (s *FunctionalSuite) TestSignalWithStartWorkflow() {
 		Identity: identity,
 	})
 	s.NoError(err)
+
+	// wait for visibility to settle
+	time.Sleep(waitForESToSettle)
 
 	for i := 0; i < 10; i++ { // retry
 		listResp, err = s.engine.ListOpenWorkflowExecutions(NewContext(), listOpenRequest)

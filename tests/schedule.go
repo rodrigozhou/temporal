@@ -278,7 +278,7 @@ func (s *ScheduleFunctionalSuite) TestBasics() {
 		s.False(entry.Info.Paused)
 		s.Equal(describeResp.Info.RecentActions, entry.Info.RecentActions) // 2 is below the limit where list entry might be cut off
 		return true
-	}, 10*time.Second, 1*time.Second)
+	}, 10*time.Second, waitForESToSettle)
 
 	// list workflows
 
@@ -411,7 +411,7 @@ func (s *ScheduleFunctionalSuite) TestBasics() {
 		})
 		s.NoError(err)
 		return len(listResp.Schedules) == 0
-	}, 10*time.Second, 1*time.Second)
+	}, 10*time.Second, waitForESToSettle)
 }
 
 func (s *ScheduleFunctionalSuite) TestInput() {
@@ -709,7 +709,7 @@ func (s *ScheduleFunctionalSuite) TestListBeforeRun() {
 		s.Greater(len(entry.Info.FutureActionTimes), 1)
 		s.True(entry.Info.FutureActionTimes[0].AsTime().After(startTime))
 		return true
-	}, 10*time.Second, 1*time.Second)
+	}, 10*time.Second, waitForESToSettle)
 
 	// cleanup
 	_, err = s.engine.DeleteSchedule(NewContext(), &workflowservice.DeleteScheduleRequest{

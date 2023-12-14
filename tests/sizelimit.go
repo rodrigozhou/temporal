@@ -232,7 +232,7 @@ SignalLoop:
 			break
 		}
 		s.Logger.Info("Closed WorkflowExecution is not yet visible")
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(waitForESToSettle)
 	}
 	s.True(isCloseCorrect)
 }
@@ -483,7 +483,7 @@ func (s *SizeLimitFunctionalSuite) TestTerminateWorkflowCausedByMsSizeLimit() {
 			break
 		}
 		s.Logger.Info("Closed WorkflowExecution is not yet visible")
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(waitForESToSettle)
 	}
 	s.True(isCloseCorrect)
 }
@@ -578,7 +578,7 @@ SignalLoop:
 			break
 		}
 		s.Logger.Info("Closed WorkflowExecution is not yet visible")
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(waitForESToSettle)
 	}
 	s.True(isCloseCorrect)
 }

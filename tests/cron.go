@@ -475,7 +475,7 @@ func (s *ClientFunctionalSuite) TestCronWorkflowCompletionStates() {
 	ts = time.Now()
 
 	// let first run finish, then check execution and history of second run
-	time.Sleep(500 * time.Millisecond)
+	time.Sleep(max(500*time.Millisecond, waitForESToSettle))
 	exec = s.listOpenWorkflowExecutions(startTs, time.Now(), id, 1)[0]
 	s.Equal(enumspb.WORKFLOW_EXECUTION_STATUS_RUNNING, exec.GetStatus())
 	lastEvent = s.getLastEvent(s.namespace, exec.GetExecution())
