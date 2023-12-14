@@ -622,7 +622,6 @@ func (s *VisibilityPersistenceSuite) TestDeleteWorkflow() {
 			NamespaceID: testNamespaceUUID,
 			WorkflowID:  row.GetExecution().GetWorkflowId(),
 			RunID:       row.GetExecution().GetRunId(),
-			StartTime:   startTime,
 		})
 		s.Nil(err7)
 	}
@@ -716,7 +715,6 @@ func (s *VisibilityPersistenceSuite) TestGetWorkflowExecution() {
 			&manager.GetWorkflowExecutionRequest{
 				NamespaceID: testNamespaceUUID,
 				RunID:       req.Execution.RunId,
-				StartTime:   startTime,
 			},
 		)
 		s.NoError(err)
@@ -733,7 +731,6 @@ func (s *VisibilityPersistenceSuite) TestGetWorkflowExecution() {
 			&manager.GetWorkflowExecutionRequest{
 				NamespaceID: testNamespaceUUID,
 				RunID:       req.Execution.RunId,
-				CloseTime:   closeTime,
 			},
 		)
 		s.NoError(err)
